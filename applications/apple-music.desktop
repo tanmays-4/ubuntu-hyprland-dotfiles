@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Apple Music
+Comment=Listen to Apple Music
+Exec=brave-browser --app=https://music.apple.com
+Icon=/home/tanmay-sharma/.local/share/icons/apple-music.png
+StartupWMClass=brave-music.apple.com__-Default
+Categories=AudioVideo;Audio;Music;

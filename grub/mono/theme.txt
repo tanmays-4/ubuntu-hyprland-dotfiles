@@ -1,0 +1,61 @@
+desktop-color: "#000000"
+title-text: ""
+terminal-font: "JetBrains Mono Regular 16"
+
++ label {
+    top = 24%
+    left = 0
+    width = 100%
+    align = "center"
+    text = "> SELECT SYSTEM_"
+    font = "JetBrains Mono Bold 24"
+    color = "#33ff66"
+}
+
++ label {
+    top = 29%
+    left = 0
+    width = 100%
+    align = "center"
+    text = "ts-yoga  ·  boot manager"
+    font = "JetBrains Mono Regular 16"
+    color = "#1f8a3f"
+}
+
++ boot_menu {
+    left = 30%
+    top = 37%
+    width = 40%
+    height = 34%
+    item_font = "JetBrains Mono Regular 24"
+    item_color = "#1c5e2e"
+    selected_item_font = "JetBrains Mono Bold 24"
+    selected_item_color = "#39ff6a"
+    item_height = 48
+    item_padding = 0
+    item_spacing = 14
+    icon_width = 0
+    icon_height = 0
+    scrollbar = false
+}
+
++ label {
+    top = 76%
+    left = 0
+    width = 100%
+    align = "center"
+    text = "[↑ ↓] choose     [Enter] start"
+    font = "JetBrains Mono Regular 16"
+    color = "#1f8a3f"
+}
+
++ label {
+    id = "__timeout__"
+    top = 80%
+    left = 0
+    width = 100%
+    align = "center"
+    text = "auto-boot in %d s"
+    font = "JetBrains Mono Regular 16"
+    color = "#2fbf5a"
+}
