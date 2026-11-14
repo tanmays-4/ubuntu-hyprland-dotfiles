@@ -453,15 +453,7 @@ PanelWindow {
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 4
-                            Glyph { kind: "bat"; width: 18; level: bar.batLevel; flag: bar.charging }
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: Math.round(bar.batLevel * 100) + "%"
-                                font.family: "Inter"
-                                font.pixelSize: 11
-                                font.weight: Font.Medium
-                                color: "#dcdcdc"
-                            }
+                            Battery { id: batWidget; anchors.verticalCenter: parent.verticalCenter }
                         }
                     }
 
@@ -469,7 +461,14 @@ PanelWindow {
                         id: statusArea
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: Hyprland.dispatch("exec qs ipc call quicksettings toggle")
+                        onClicked: (mouse) => {
+                            const m = mapToItem(null, mouse.x, mouse.y)
+                            const b = batWidget.mapToItem(null, 0, 0)
+                            if (m.x >= b.x - 4 && m.x <= b.x + batWidget.width + 4)
+                                Hyprland.dispatch("exec qs ipc call battery toggle " + Math.round(b.x))
+                            else
+                                Hyprland.dispatch("exec qs ipc call quicksettings toggle")
+                        }
                         onWheel: wheel => {
                             if (!bar.sink || !bar.sink.audio) return
                             const change = wheel.angleDelta.y / 2400

@@ -4,6 +4,8 @@ import Quickshell.Services.Mpris
 import QtQuick
 
 Card {
+    property bool dashOpen: true
+
     id: music
 
     property var player: {
@@ -22,14 +24,14 @@ Card {
 
     Timer {
         interval: 1000
-        running: music.playing
+        running: music.playing && dashOpen
         repeat: true
         onTriggered: music.player.positionChanged()
     }
 
     Process {
         id: cava
-        running: music.playing
+        running: music.playing && dashOpen
         command: ["cava", "-p", Quickshell.env("HOME") + "/.config/quickshell/scripts/cava.conf"]
         stdout: SplitParser {
             onRead: data => {

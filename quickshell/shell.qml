@@ -36,6 +36,8 @@ ShellRoot {
 
     WindowMenu {}
 
+    BatteryMenu {}
+
     WindowRules {}
 
     NotificationPopups {}

@@ -13,6 +13,9 @@ built on **Hyprland** with a fully custom **Quickshell** (QML) shell.
 - Wi-Fi, Bluetooth, volume and battery; click for Quick Settings, scroll for volume
 - Current app name: click for a dropdown of open windows, double-click to maximise or restore
 - Minimise, maximise and close buttons, plus a "N hidden" pill for minimised apps
+- Battery icon that changes colour: green with ⚡ when charging, yellow in Power Saver, red below 15%
+- Click the battery for a menu with charge level, time remaining and Performance / Balanced / Power Saver
+- Switches to Power Saver automatically below 30% and restores your mode when you plug in
 
 **Dashboard** (`Super + W`)
 - Analog and digital clock with a greeting
@@ -75,7 +78,7 @@ wallpapers/    wallpaper
 sudo add-apt-repository -y ppa:avengemedia/danklinux
 sudo apt install -y hyprland quickshell hyprlock hypridle hyprpolkitagent \
   kitty fuzzel nautilus playerctl brightnessctl cava grim slurp wl-clipboard \
-  cliphist blueman imagemagick libnotify-bin fonts-inter fonts-jetbrains-mono
+  cliphist blueman imagemagick libnotify-bin power-profiles-daemon fonts-inter fonts-jetbrains-mono
 sudo usermod -aG video $USER   # brightness control
 
 cp -r hypr/* ~/.config/hypr/

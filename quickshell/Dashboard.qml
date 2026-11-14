@@ -156,6 +156,7 @@ PanelWindow {
                     columnSpacing: 16
 
                     MusicCard {
+                    dashOpen: dash.shown
                         Layout.columnSpan: 2
                         Layout.preferredWidth: dash.colWidth * 2 + 16
                         Layout.preferredHeight: 222
