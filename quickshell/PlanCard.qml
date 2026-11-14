@@ -6,11 +6,13 @@ Card {
     id: plan
     title: "TODAY"
 
-    property int startHour: 9
-    property int endHour: 21
+    property int startHour: 6
+    property int endHour: 24
+    property real pxh: 36
     property var store: ({})
     property bool adding: false
     property string error: ""
+    property bool dashOpen: true
 
     SystemClock {
         id: clk
@@ -20,6 +22,9 @@ Card {
     property real now: clk.date.getHours() + clk.date.getMinutes() / 60
     property string dayKey: Qt.formatDate(clk.date, "yyyy-MM-dd")
     property var slots: store[dayKey] ? store[dayKey] : []
+
+    onDashOpenChanged: if (dashOpen) scrollTo(now)
+    Component.onCompleted: scrollTo(now)
 
     FileView {
         id: file
@@ -34,11 +39,18 @@ Card {
         file.setText(JSON.stringify(store, null, 2))
     }
 
+    function scrollTo(h) {
+        const target = (h - startHour) * pxh - flick.height / 3
+        const maxY = Math.max(0, flick.contentHeight - flick.height)
+        flick.contentY = Math.max(0, Math.min(maxY, target))
+    }
+
     function parseTime(t) {
         const m = /^(\d{1,2}):(\d{2})$/.exec(t.trim())
         if (!m) return -1
         const h = Number(m[1])
         const mi = Number(m[2])
+        if (h === 24 && mi === 0) return 24
         if (h > 23 || mi > 59) return -1
         return h + mi / 60
     }
@@ -67,6 +79,7 @@ Card {
         list.sort((x, y) => x.start - y.start)
         setSlots(list)
         error = ""
+        scrollTo(a)
         return true
     }
 
@@ -79,7 +92,7 @@ Card {
     function openForm() {
         titleField.text = ""
         startField.text = fmt(Math.floor(now))
-        endField.text = fmt(Math.min(23, Math.floor(now) + 1))
+        endField.text = fmt(Math.min(24, Math.floor(now) + 1))
         error = ""
         adding = true
         titleField.editor.forceActiveFocus()
@@ -89,6 +102,7 @@ Card {
         if (addSlot(titleField.text, startField.text, endField.text)) adding = false
     }
 
+    // + / × button
     Rectangle {
         x: plan.width - 44
         y: 12
@@ -115,220 +129,245 @@ Card {
         }
     }
 
-    Item {
-        id: timeline
+    // scrollable timeline
+    Flickable {
+        id: flick
         x: 18
         y: 50
         width: plan.width - 36
         height: plan.height - 50 - 16
+        clip: true
+        contentWidth: width
+        contentHeight: timeline.height + 16
+        boundsBehavior: Flickable.StopAtBounds
 
-        property real pxh: height / (plan.endHour - plan.startHour)
+        Item {
+            id: timeline
+            y: 8
+            width: flick.width - 8
+            height: (plan.endHour - plan.startHour) * plan.pxh
 
-        Repeater {
-            model: plan.endHour - plan.startHour + 1
+            Repeater {
+                model: plan.endHour - plan.startHour + 1
 
+                Item {
+                    required property int index
+                    y: index * plan.pxh
+                    width: timeline.width
+                    height: 1
+
+                    Text {
+                        y: -6
+                        text: String(plan.startHour + index).padStart(2, "0") + ":00"
+                        font.family: "JetBrains Mono"
+                        font.pixelSize: 9
+                        color: "#6e6e6e"
+                    }
+
+                    Rectangle {
+                        x: 40
+                        width: parent.width - 40
+                        height: 1
+                        color: "#0dffffff"
+                    }
+                }
+            }
+
+            Repeater {
+                model: plan.slots
+
+                Rectangle {
+                    id: slot
+                    required property var modelData
+                    required property int index
+                    property real s: Math.max(plan.startHour, modelData.start)
+                    property real e: Math.min(plan.endHour, modelData.end)
+                    property bool active: plan.now >= modelData.start && plan.now < modelData.end
+                    property bool past: plan.now >= modelData.end
+
+                    visible: e > s
+                    x: 44
+                    y: (s - plan.startHour) * plan.pxh + 1
+                    width: timeline.width - 44
+                    height: Math.max(14, (e - s) * plan.pxh - 2)
+                    radius: 7
+                    color: active ? "#24ffffff" : "#0bffffff"
+                    border.color: active ? "#59ffffff" : "#12ffffff"
+                    border.width: 1
+                    clip: true
+
+                    HoverHandler { id: slotHover }
+
+                    Column {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 8
+                        anchors.right: parent.right
+                        anchors.rightMargin: 24
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: slot.modelData.title
+                            font.family: "Inter"
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                            color: slot.past ? "#8a8a8a" : "#ececec"
+                        }
+
+                        Text {
+                            visible: slot.height >= 30
+                            text: plan.fmt(slot.modelData.start) + " – " + plan.fmt(slot.modelData.end)
+                            font.family: "JetBrains Mono"
+                            font.pixelSize: 9
+                            color: slot.past ? "#6e6e6e" : "#9a9a9a"
+                        }
+                    }
+
+                    Text {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: slotHover.hovered
+                        text: "×"
+                        font.family: "Inter"
+                        font.pixelSize: 14
+                        color: delArea.containsMouse ? "#ffffff" : "#9a9a9a"
+
+                        MouseArea {
+                            id: delArea
+                            anchors.fill: parent
+                            anchors.margins: -6
+                            hoverEnabled: true
+                            onClicked: plan.removeSlot(slot.index)
+                        }
+                    }
+                }
+            }
+
+            // "now" line
             Item {
-                required property int index
-                y: index * timeline.pxh
-                width: timeline.width
-                height: 1
+                visible: plan.now >= plan.startHour && plan.now <= plan.endHour
+                y: (plan.now - plan.startHour) * plan.pxh - 3
+                x: 36
+                width: timeline.width - 36
+                height: 7
 
-                Text {
-                    y: -6
-                    text: String(plan.startHour + index).padStart(2, "0") + ":00"
-                    font.family: "JetBrains Mono"
-                    font.pixelSize: 9
-                    color: "#6e6e6e"
+                Rectangle {
+                    width: 7
+                    height: 7
+                    radius: 3.5
+                    color: "#ffffff"
                 }
 
                 Rectangle {
-                    x: 40
-                    width: parent.width - 40
+                    x: 6
+                    y: 3
+                    width: parent.width - 6
                     height: 1
-                    color: "#0dffffff"
+                    color: "#ffffff"
                 }
             }
         }
+    }
 
-        Repeater {
-            model: plan.slots
+    // thin scrollbar
+    Rectangle {
+        visible: flick.contentHeight > flick.height
+        x: plan.width - 14
+        y: flick.y + flick.visibleArea.yPosition * flick.height
+        width: 3
+        height: Math.max(20, flick.visibleArea.heightRatio * flick.height)
+        radius: 1.5
+        color: "#ffffff"
+        opacity: flick.moving ? 0.5 : 0.15
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+    }
 
-            Rectangle {
-                id: slot
-                required property var modelData
-                required property int index
-                property real s: Math.max(plan.startHour, modelData.start)
-                property real e: Math.min(plan.endHour, modelData.end)
-                property bool active: plan.now >= modelData.start && plan.now < modelData.end
-                property bool past: plan.now >= modelData.end
+    // new slot form (stays fixed, does not scroll)
+    Rectangle {
+        visible: plan.adding
+        x: 18
+        y: 50
+        width: plan.width - 36
+        height: form.implicitHeight + 24
+        radius: 12
+        color: "#f50c0c0d"
+        border.color: "#24ffffff"
+        border.width: 1
 
-                visible: e > s
-                x: 44
-                y: (s - plan.startHour) * timeline.pxh + 1
-                width: timeline.width - 44
-                height: Math.max(14, (e - s) * timeline.pxh - 2)
-                radius: 7
-                color: active ? "#24ffffff" : "#0bffffff"
-                border.color: active ? "#59ffffff" : "#12ffffff"
-                border.width: 1
-                clip: true
+        MouseArea { anchors.fill: parent }
 
-                HoverHandler { id: slotHover }
-
-                Column {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 8
-                    anchors.right: parent.right
-                    anchors.rightMargin: 24
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Text {
-                        width: parent.width
-                        elide: Text.ElideRight
-                        text: slot.modelData.title
-                        font.family: "Inter"
-                        font.pixelSize: 11
-                        font.weight: Font.Medium
-                        color: slot.past ? "#8a8a8a" : "#ececec"
-                    }
-
-                    Text {
-                        visible: slot.height >= 30
-                        text: plan.fmt(slot.modelData.start) + " – " + plan.fmt(slot.modelData.end)
-                        font.family: "JetBrains Mono"
-                        font.pixelSize: 9
-                        color: slot.past ? "#6e6e6e" : "#9a9a9a"
-                    }
-                }
-
-                Text {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: slotHover.hovered
-                    text: "×"
-                    font.family: "Inter"
-                    font.pixelSize: 14
-                    color: delArea.containsMouse ? "#ffffff" : "#9a9a9a"
-
-                    MouseArea {
-                        id: delArea
-                        anchors.fill: parent
-                        anchors.margins: -6
-                        hoverEnabled: true
-                        onClicked: plan.removeSlot(slot.index)
-                    }
-                }
-            }
-        }
-
-        Item {
-            visible: plan.now >= plan.startHour && plan.now <= plan.endHour
-            y: (plan.now - plan.startHour) * timeline.pxh - 3
-            x: 36
-            width: timeline.width - 36
-            height: 7
-
-            Rectangle {
-                width: 7
-                height: 7
-                radius: 3.5
-                color: "#ffffff"
-            }
-
-            Rectangle {
-                x: 6
-                y: 3
-                width: parent.width - 6
-                height: 1
-                color: "#ffffff"
-            }
-        }
-
-        Rectangle {
-            visible: plan.adding
+        Column {
+            id: form
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            height: form.implicitHeight + 24
-            radius: 12
-            color: "#f50c0c0d"
-            border.color: "#24ffffff"
-            border.width: 1
+            anchors.margins: 12
+            spacing: 8
 
-            MouseArea { anchors.fill: parent }
+            Text {
+                text: "NEW SLOT"
+                font.family: "JetBrains Mono"
+                font.pixelSize: 9
+                font.letterSpacing: 1.6
+                color: "#8a8a8a"
+            }
 
-            Column {
-                id: form
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 12
+            Field {
+                id: titleField
+                width: parent.width
+                hint: "What are you doing?"
+                onSubmitted: plan.submit()
+            }
+
+            Row {
+                width: parent.width
                 spacing: 8
 
-                Text {
-                    text: "NEW SLOT"
-                    font.family: "JetBrains Mono"
-                    font.pixelSize: 9
-                    font.letterSpacing: 1.6
-                    color: "#8a8a8a"
-                }
-
                 Field {
-                    id: titleField
-                    width: parent.width
-                    hint: "What are you doing?"
+                    id: startField
+                    width: (parent.width - 8) / 2
+                    hint: "Start 14:00"
                     onSubmitted: plan.submit()
                 }
 
-                Row {
-                    width: parent.width
-                    spacing: 8
-
-                    Field {
-                        id: startField
-                        width: (parent.width - 8) / 2
-                        hint: "Start 14:00"
-                        onSubmitted: plan.submit()
-                    }
-
-                    Field {
-                        id: endField
-                        width: (parent.width - 8) / 2
-                        hint: "End 15:00"
-                        onSubmitted: plan.submit()
-                    }
+                Field {
+                    id: endField
+                    width: (parent.width - 8) / 2
+                    hint: "End 15:00"
+                    onSubmitted: plan.submit()
                 }
+            }
+
+            Text {
+                visible: plan.error !== ""
+                text: plan.error
+                font.family: "Inter"
+                font.pixelSize: 11
+                color: "#b4b4b4"
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 30
+                radius: 8
+                color: saveArea.containsMouse ? "#ffffff" : "#ececec"
 
                 Text {
-                    visible: plan.error !== ""
-                    text: plan.error
+                    anchors.centerIn: parent
+                    text: "Add slot"
                     font.family: "Inter"
-                    font.pixelSize: 11
-                    color: "#b4b4b4"
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    color: "#0a0a0b"
                 }
 
-                Rectangle {
-                    width: parent.width
-                    height: 30
-                    radius: 8
-                    color: saveArea.containsMouse ? "#ffffff" : "#ececec"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Add slot"
-                        font.family: "Inter"
-                        font.pixelSize: 12
-                        font.weight: Font.Medium
-                        color: "#0a0a0b"
-                    }
-
-                    MouseArea {
-                        id: saveArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: plan.submit()
-                    }
+                MouseArea {
+                    id: saveArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: plan.submit()
                 }
             }
         }

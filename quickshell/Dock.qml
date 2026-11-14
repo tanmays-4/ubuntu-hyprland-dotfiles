@@ -182,7 +182,10 @@ PanelWindow {
                     Rectangle {
                         id: appBtn
                         required property var modelData
-                        property var win: ToplevelManager.toplevels.values.find(t => modelData.ids.some(id => (t.appId || "").toLowerCase().indexOf(id) !== -1))
+                        property var hwin: Hyprland.toplevels.values.find(t => t.wayland && t.workspace && Hyprland.focusedWorkspace
+                            && (t.workspace.id === Hyprland.focusedWorkspace.id || t.workspace.id < 0)
+                            && modelData.ids.some(id => (t.wayland.appId || "").toLowerCase().indexOf(id) !== -1))
+                        property var win: hwin ? hwin.wayland : null
                         property bool running: win !== undefined && win !== null
 
                         width: 42
@@ -211,7 +214,12 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                if (appBtn.running) appBtn.win.activate()
+                                if (appBtn.running) {
+                                    const a = String(appBtn.hwin.address)
+                                    if (appBtn.hwin.workspace.id < 0 && Hyprland.focusedWorkspace)
+                                        Hyprland.dispatch("movetoworkspace " + Hyprland.focusedWorkspace.id + ",address:" + (a.startsWith("0x") ? a : "0x" + a))
+                                    appBtn.win.activate()
+                                }
                                 else Hyprland.dispatch("exec " + appBtn.modelData.cmd)
                                 dock.shown = false
                             }

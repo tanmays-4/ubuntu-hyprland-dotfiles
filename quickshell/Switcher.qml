@@ -48,7 +48,8 @@ PanelWindow {
             onStreamFinished: {
                 let list = []
                 try { list = JSON.parse(cout.text) } catch (e) {}
-                list = list.filter(c => c.mapped && c.address)
+                const cur = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+                list = list.filter(c => c.mapped && c.address && c.workspace && (c.workspace.id === cur || c.workspace.id < 0))
                 list.sort((a, b) => a.focusHistoryID - b.focusHistoryID)
                 sw.wins = list
                 if (list.length === 0) {

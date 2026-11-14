@@ -168,6 +168,7 @@ PanelWindow {
                     }
 
                     PlanCard {
+                    dashOpen: dash.shown
                         Layout.rowSpan: 2
                         Layout.preferredWidth: dash.colWidth
                         Layout.preferredHeight: 222 + 16 + 196

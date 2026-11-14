@@ -60,7 +60,8 @@ PanelWindow {
     function show() {
         try { Hyprland.refreshToplevels() } catch (e) {}
         const active = ToplevelManager.activeToplevel
-        const list = Hyprland.toplevels.values.filter(t => t.wayland)
+        const cur = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+        const list = Hyprland.toplevels.values.filter(t => t.wayland && t.workspace && (t.workspace.id === cur || t.workspace.id < 0))
         list.sort((a, b) => (b.wayland === active) - (a.wayland === active))
         wins = list
         index = list.length > 1 ? 1 : 0
