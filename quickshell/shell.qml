@@ -38,6 +38,8 @@ ShellRoot {
 
     BatteryMenu {}
 
+    SnapMenu {}
+
     WindowRules {}
 
     NotificationPopups {}

@@ -21,13 +21,15 @@ built on **Hyprland** with a fully custom **Quickshell** (QML) shell.
 - Analog and digital clock with a greeting
 - Music card with a live cava visualiser
 - Calendar, CPU, RAM, disk, temperature and battery rings
-- Day planner with time slots (09:00–21:00) and a to-do list, saved locally
+- Scrollable day planner with time slots (06:00–24:00) and a to-do list, saved locally
 - Transparent on an empty desktop, frosted glass over apps
 
 **Windows-like behaviour**
 - Apps open maximised, with minimise and restore
 - Alt+Tab switcher and Task View with live previews (`Super + Tab`)
 - Resize from the window edges
+- Snap layouts (`Super + Z`): halves, quarters, 1 + 2 or maximise, like Windows 11
+- Each workspace keeps its own apps: Alt+Tab, Task View, the window list and the dock only show the current workspace
 
 **Everything else**
 - Auto-hiding dock (hover the bottom line, or `Super + Space`)
