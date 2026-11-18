@@ -15,7 +15,9 @@ Card {
         id: clk
         precision: SystemClock.Minutes
     }
-    property string today: key(clk.date)
+    // the "day" starts at 5:30 AM, not midnight
+    readonly property int dayStartMinutes: 5 * 60 + 30
+    property string today: key(new Date(clk.date.getTime() - dayStartMinutes * 60000))
     property int todayDow: fromKey(today).getDay()
     onTodayChanged: prune()
 

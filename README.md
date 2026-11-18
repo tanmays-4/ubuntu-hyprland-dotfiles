@@ -21,7 +21,13 @@ built on **Hyprland** with a fully custom **Quickshell** (QML) shell.
 - Analog and digital clock with a greeting
 - Music card with a live cava visualiser
 - Calendar, CPU, RAM, disk, temperature and battery rings
-- Scrollable day planner with time slots (06:00–24:00) and a to-do list, saved locally
+- Scrollable day planner with time slots (06:00–24:00)
+- To-do list (Microsoft To Do style):
+  - Type due dates in plain words: `today`, `tomorrow`, `fri`, `next monday`, `in 3 days`, `25 nov`, `25/11`
+  - Today / Missed / Next tabs; unfinished tasks move to Missed automatically
+  - Repeating tasks: `gym daily`, `standup weekdays`, `class every mon and thu`
+  - GitHub-style activity heatmap with streak counter
+  - The day resets at **5:30 AM**, so late-night work counts towards the previous day
 - Transparent on an empty desktop, frosted glass over apps
 
 **Windows-like behaviour**
