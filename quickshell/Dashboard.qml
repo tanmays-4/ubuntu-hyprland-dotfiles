@@ -96,7 +96,7 @@ PanelWindow {
             id: content
             anchors.centerIn: parent
             width: 1136
-            height: 660
+            height: 826
             opacity: dash.shown ? 1 : 0
             scale: dash.shown ? 1 : 0.94
 
@@ -169,9 +169,9 @@ PanelWindow {
 
                     PlanCard {
                     dashOpen: dash.shown
-                        Layout.rowSpan: 2
+                        Layout.rowSpan: 3
                         Layout.preferredWidth: dash.colWidth
-                        Layout.preferredHeight: 222 + 16 + 196
+                        Layout.preferredHeight: 222 + 16 + 196 + 16 + 150
                     }
 
                     StatsCard {
@@ -183,6 +183,12 @@ PanelWindow {
                     TodoCard {
                         Layout.preferredWidth: dash.colWidth
                         Layout.preferredHeight: 196
+                    }
+
+                    HeatmapCard {
+                        Layout.columnSpan: 3
+                        Layout.preferredWidth: dash.colWidth * 3 + 32
+                        Layout.preferredHeight: 150
                     }
                 }
             }

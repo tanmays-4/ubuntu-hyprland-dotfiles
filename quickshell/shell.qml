@@ -40,6 +40,8 @@ ShellRoot {
 
     SnapMenu {}
 
+    TodoApp {}
+
     WindowRules {}
 
     NotificationPopups {}
