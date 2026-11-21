@@ -42,6 +42,8 @@ ShellRoot {
 
     TodoApp {}
 
+    PowerMenu {}
+
     WindowRules {}
 
     NotificationPopups {}

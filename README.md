@@ -34,6 +34,9 @@ built on **Hyprland** with a fully custom **Quickshell** (QML) shell.
 - Apps open maximised, with minimise and restore
 - Alt+Tab switcher and Task View with live previews (`Super + Tab`)
 - Resize from the window edges
+- To Do app (`Super + T`) in the style of Microsoft To Do: My Day, Important, Planned, Missed, Repeating and custom lists, plus steps, notes, stars and a details pane
+- Activity heatmap tile on the dashboard (GitHub style, with a streak counter)
+- Power menu (`Super + Esc`): Lock, Sleep, Log out, Restart, Shut down
 - Snap layouts (`Super + Z`): halves, quarters, 1 + 2 or maximise, like Windows 11
 - Each workspace keeps its own apps: Alt+Tab, Task View, the window list and the dock only show the current workspace
 
